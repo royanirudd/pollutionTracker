@@ -17,14 +17,9 @@ const pollutionReportSchema = new mongoose.Schema({
     required: true
   },
   imageUrl: {
-    type: String,
-    required: true
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now
+    type: String
   }
-});
+}, { timestamps: true });
 
 pollutionReportSchema.index({ location: '2dsphere' });
 

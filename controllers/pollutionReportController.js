@@ -1,52 +1,43 @@
-const PollutionReport = require('../models/PollutionReport');
-const multer = require('multer');
-const path = require('path');
+const PollutionReport = require('../models/pollutionReport');
 
-// Configure multer for file upload
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'public/uploads/');
-  },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + path.extname(file.originalname));
-  }
-});
+exports.createReport = async (req, res) => {
+  try {
+    console.log('Received report data:', req.body);
+    console.log('Received file:', req.file);
 
-const upload = multer({ storage: storage });
+    const { location, description } = req.body;
+    console.log('Extracted location:', location);
+    console.log('Extracted description:', description);
+    let coordinates;
 
-exports.createReport = [
-  upload.single('image'),
-  async (req, res) => {
-    try {
-      console.log('Received report data:', req.body);
-      const { location, description } = req.body;
-      const [latitude, longitude] = location.split(',').map(coord => parseFloat(coord.trim()));
-
-      // Validate coordinates
-      if (isNaN(latitude) || latitude < -90 || latitude > 90 ||
-          isNaN(longitude) || longitude < -180 || longitude > 180) {
-        return res.status(400).json({ error: 'Invalid coordinates. Latitude must be between -90 and 90, and longitude between -180 and 180.' });
-      }
-
-      const imageUrl = req.file ? `/uploads/${req.file.filename}` : null;
-
-      const newReport = new PollutionReport({
-        location: {
-          type: 'Point',
-          coordinates: [longitude, latitude]
-        },
-        description,
-        imageUrl
-      });
-      await newReport.save();
-      console.log('Report saved:', newReport);
-      res.status(201).json(newReport);
-    } catch (error) {
-      console.error('Error creating pollution report:', error);
-      res.status(500).json({ error: 'Error creating pollution report', details: error.message });
+    if (location && location.includes(',')) {
+      // If location is provided as "latitude,longitude"
+      coordinates = location.split(',').map(coord => parseFloat(coord.trim()));
+    } else {
+      // If location is not provided or is in an invalid format
+      // You might want to use a geocoding service here to convert it to coordinates
+      // For now, we'll just use a placeholder
+      coordinates = [0, 0];
     }
+
+    const imageUrl = req.file ? `/uploads/${req.file.filename}` : null;
+
+    const newReport = new PollutionReport({
+      location: {
+        type: 'Point',
+        coordinates: [coordinates[1], coordinates[0]] // GeoJSON format is [longitude, latitude]
+      },
+      description,
+      imageUrl
+    });
+
+    await newReport.save();
+    res.status(201).json(newReport);
+  } catch (error) {
+    console.error('Error creating pollution report:', error);
+    res.status(500).json({ error: 'Error creating pollution report', details: error.message });
   }
-];
+};
 
 exports.getReports = async (req, res) => {
   try {
