@@ -3,31 +3,32 @@ html(lang="en")
   head
     meta(charset="UTF-8")
     meta(name="viewport", content="width=device-width, initial-scale=1.0")
-    title= title
+    title Pollution Tracker
     link(rel="stylesheet", href="/css/style.css")
     link(rel="stylesheet", href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css")
     script(src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js")
   body
-    h1 Pollution Tracker
-    #map(style="height: 400px; margin-bottom: 20px;")
-    form#pollution-form
-      h2 Report Pollution
-      div
-        label(for="latitude") Latitude:
-        input#latitude(type="number", step="any", required)
-      div
-        label(for="longitude") Longitude:
-        input#longitude(type="number", step="any", required)
-      div
-        label(for="description") Description:
-        textarea#description(required)
-      div
-        label(for="image") Image URL:
-        input#image(type="url", required)
-      button(type="submit") Submit Report
+    .container
+      h1.title Pollution Tracker
+      #map
+      .form-container
+        form#pollution-form
+          h2 Report Pollution
+          .form-group
+            label(for="location") Location:
+            input#location(type="text", required, placeholder="Enter a location")
+          .form-group
+            button#use-current-location.btn-secondary(type="button") Use Current Location
+          .form-group
+            label(for="description") Description:
+            textarea#description(required)
+          .form-group
+            label(for="image") Image URL:
+            input#image(type="url", required)
+          button.btn(type="submit") Submit Report
 
-    #reports
-      h2 Recent Reports
-      ul#report-list
+      .reports-container
+        h2 Recent Reports
+        ul#report-list
 
     script(src="/js/main.js")

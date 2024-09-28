@@ -1,9 +1,12 @@
 let map;
 let markers = [];
+let currentMarker;
 
 document.addEventListener('DOMContentLoaded', () => {
   const form = document.getElementById('pollution-form');
   const reportList = document.getElementById('report-list');
+  const locationInput = document.getElementById('location');
+  const useCurrentLocationButton = document.getElementById('use-current-location');
 
   // Initialize map
   map = L.map('map').setView([0, 0], 2);
@@ -11,27 +14,19 @@ document.addEventListener('DOMContentLoaded', () => {
     attribution: '© OpenStreetMap contributors'
   }).addTo(map);
 
+  useCurrentLocationButton.addEventListener('click', useCurrentLocation);
+
+  locationInput.addEventListener('change', searchLocation);
+
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
 
-    const latitude = parseFloat(document.getElementById('latitude').value);
-    const longitude = parseFloat(document.getElementById('longitude').value);
-    const description = document.getElementById('description').value;
-    const imageUrl = document.getElementById('image').value;
-
-    if (isNaN(latitude) || latitude < -90 || latitude > 90 ||
-        isNaN(longitude) || longitude < -180 || longitude > 180) {
-      alert('Invalid coordinates. Latitude must be between -90 and 90, and longitude between -180 and 180.');
-      return;
-    }
+    const formData = new FormData(form);
 
     try {
       const response = await fetch('/api/reports', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ latitude, longitude, description, imageUrl }),
+        body: formData,
       });
 
       if (response.ok) {
@@ -39,6 +34,10 @@ document.addEventListener('DOMContentLoaded', () => {
         addReportToList(newReport);
         addMarkerToMap(newReport);
         form.reset();
+        if (currentMarker) {
+          map.removeLayer(currentMarker);
+          currentMarker = null;
+        }
       } else {
         const errorData = await response.json();
         console.error('Failed to submit report:', errorData);
@@ -66,6 +65,49 @@ document.addEventListener('DOMContentLoaded', () => {
     const marker = L.marker([lat, lng]).addTo(map);
     marker.bindPopup(`<b>Description:</b> ${report.description}<br><img src="${report.imageUrl}" alt="Pollution Report Image" style="max-width: 100px;">`);
     markers.push(marker);
+  }
+
+  async function searchLocation() {
+    const query = locationInput.value;
+    try {
+      const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`);
+      const data = await response.json();
+      if (data.length > 0) {
+        const { lat, lon } = data[0];
+        updateMapLocation(lat, lon);
+      } else {
+        alert('Location not found');
+      }
+    } catch (error) {
+      console.error('Error searching location:', error);
+      alert('Error searching location');
+    }
+  }
+
+  function useCurrentLocation() {
+    if ('geolocation' in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          updateMapLocation(latitude, longitude);
+        },
+        (error) => {
+          console.error('Error getting current location:', error);
+          alert('Error getting current location');
+        }
+      );
+    } else {
+      alert('Geolocation is not supported by your browser');
+    }
+  }
+
+  function updateMapLocation(lat, lon) {
+    if (currentMarker) {
+      map.removeLayer(currentMarker);
+    }
+    currentMarker = L.marker([lat, lon]).addTo(map);
+    map.setView([lat, lon], 13);
+    locationInput.value = `${lat}, ${lon}`;
   }
 
   // Fetch and display existing reports
