@@ -1,11 +1,12 @@
 const PollutionReport = require('../models/pollutionReport');
+const User = require('../models/user');  // Add this line to import the User model
 
 exports.getLandingPage = (req, res) => {
   res.render('landing', { title: 'Pollution Tracker' });
 };
 
 exports.getAppPage = (req, res) => {
-  res.render('index', { title: 'Pollution Tracker' });
+  res.render('index', { title: 'Pollution Tracker', user: req.user });
 };
 
 exports.createReport = async (req, res) => {
@@ -35,9 +36,26 @@ exports.createReport = async (req, res) => {
       return res.status(400).json({ error: 'Image is required' });
     }
 
+    if (!req.user) {
+      return res.status(401).json({ error: 'User must be authenticated to create a report' });
+    }
+
+    // Find the user in the database
+    const user = await User.findOne({ 
+      $or: [
+        { googleId: req.user.googleId },
+        { githubId: req.user.githubId }
+      ]
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found in the database' });
+    }
+
     const imageUrl = `/uploads/${req.file.filename}`;
 
     const newReport = new PollutionReport({
+      user: user._id,  // Use the user's ObjectId from the database
       location: {
         type: 'Point',
         coordinates: [coordinates[1], coordinates[0]] // GeoJSON format is [longitude, latitude]
@@ -57,7 +75,25 @@ exports.createReport = async (req, res) => {
 
 exports.getReports = async (req, res) => {
   try {
-    const reports = await PollutionReport.find().sort('-createdAt').lean();
+    if (!req.user) {
+      return res.status(401).json({ error: 'User must be authenticated to view reports' });
+    }
+
+    // Find the user in the database
+    const user = await User.findOne({ 
+      $or: [
+        { googleId: req.user.googleId },
+        { githubId: req.user.githubId }
+      ]
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found in the database' });
+    }
+
+    const reports = await PollutionReport.find({ user: user._id })
+      .sort('-createdAt')
+      .lean();
     res.json(reports);
   } catch (error) {
     console.error('Error fetching pollution reports:', error);
@@ -66,5 +102,5 @@ exports.getReports = async (req, res) => {
 };
 
 exports.getHomePage = (req, res) => {
-  res.render('index', { title: 'Pollution Tracker' });
+  res.render('index', { title: 'Pollution Tracker', user: req.user });
 };
