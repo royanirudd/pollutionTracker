@@ -9,6 +9,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const useCurrentLocationButton = document.getElementById('use-current-location');
   const imageInput = document.getElementById('image');
   const takePictureButton = document.getElementById('take-picture');
+  const loadingIndicator = document.createElement('div');
+  loadingIndicator.id = 'loading-indicator';
+  loadingIndicator.textContent = 'Loading...';
+  document.body.appendChild(loadingIndicator);
 
   // Initialize map
   map = L.map('map').setView([0, 0], 2);
@@ -16,12 +20,28 @@ document.addEventListener('DOMContentLoaded', () => {
     attribution: '© OpenStreetMap contributors'
   }).addTo(map);
 
+  // Add custom map controls
+  L.control.zoom({
+    position: 'topright'
+  }).addTo(map);
+
   useCurrentLocationButton.addEventListener('click', useCurrentLocation);
-  locationInput.addEventListener('change', searchLocation);
+  locationInput.addEventListener('input', debounce(searchLocation, 500));
   takePictureButton.addEventListener('click', takePicture);
 
-  form.addEventListener('submit', async (e) => {
+  form.addEventListener('submit', handleFormSubmit);
+
+  function showLoading() {
+    loadingIndicator.style.display = 'block';
+  }
+
+  function hideLoading() {
+    loadingIndicator.style.display = 'none';
+  }
+
+  async function handleFormSubmit(e) {
     e.preventDefault();
+    showLoading();
 
     const formData = new FormData(form);
 
@@ -48,16 +68,21 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch (error) {
       console.error('Error:', error);
       alert('An error occurred while submitting the report.');
+    } finally {
+      hideLoading();
     }
-  });
+  }
 
   function addReportToList(report) {
     const li = document.createElement('li');
     li.innerHTML = `
-      <strong>Location:</strong> ${report.location.coordinates[1]}, ${report.location.coordinates[0]}<br>
+      <strong>Location:</strong> ${report.location.coordinates[1].toFixed(6)}, ${report.location.coordinates[0].toFixed(6)}<br>
       <strong>Description:</strong> ${report.description}<br>
-      ${report.imageUrl ? `<img src="${report.imageUrl}" alt="Pollution Report Image" style="max-width: 200px;">` : ''}
+      ${report.imageUrl ? `<img src="${report.imageUrl}" alt="Pollution Report Image" class="report-image">` : ''}
     `;
+    li.addEventListener('click', () => {
+      map.setView([report.location.coordinates[1], report.location.coordinates[0]], 15);
+    });
     reportList.prepend(li);
   }
 
@@ -65,12 +90,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const lat = report.location.coordinates[1];
     const lng = report.location.coordinates[0];
     const marker = L.marker([lat, lng]).addTo(map);
-    marker.bindPopup(`<b>Description:</b> ${report.description}<br>${report.imageUrl ? `<img src="${report.imageUrl}" alt="Pollution Report Image" style="max-width: 100px;">` : ''}`);
+    marker.bindPopup(`
+      <b>Description:</b> ${report.description}<br>
+      ${report.imageUrl ? `<img src="${report.imageUrl}" alt="Pollution Report Image" class="popup-image">` : ''}
+    `);
     markers.push(marker);
   }
 
   async function searchLocation() {
     const query = locationInput.value;
+    if (query.length < 3) return;
+
+    showLoading();
     try {
       const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`);
       const data = await response.json();
@@ -83,19 +114,24 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch (error) {
       console.error('Error searching location:', error);
       alert('Error searching location');
+    } finally {
+      hideLoading();
     }
   }
 
   function useCurrentLocation() {
     if ('geolocation' in navigator) {
+      showLoading();
       navigator.geolocation.getCurrentPosition(
         (position) => {
           const { latitude, longitude } = position.coords;
           updateMapLocation(latitude, longitude);
+          hideLoading();
         },
         (error) => {
           console.error('Error getting current location:', error);
           alert('Error getting current location');
+          hideLoading();
         }
       );
     } else {
@@ -109,7 +145,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     currentMarker = L.marker([lat, lon]).addTo(map);
     map.setView([lat, lon], 13);
-    locationInput.value = `${lat}, ${lon}`;
+    locationInput.value = `${parseFloat(lat).toFixed(6)}, ${parseFloat(lon).toFixed(6)}`;
   }
 
   function takePicture() {
@@ -117,14 +153,16 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Fetch and display existing reports
-  fetch('/api/reports')
-    .then(response => {
+  fetchExistingReports();
+
+  async function fetchExistingReports() {
+    showLoading();
+    try {
+      const response = await fetch('/api/reports');
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      return response.json();
-    })
-    .then(reports => {
+      const reports = await response.json();
       if (Array.isArray(reports)) {
         reports.forEach(report => {
           addReportToList(report);
@@ -138,6 +176,19 @@ document.addEventListener('DOMContentLoaded', () => {
       } else {
         console.error('Expected an array of reports, but got:', reports);
       }
-    })
-    .catch(error => console.error('Error fetching reports:', error));
+    } catch (error) {
+      console.error('Error fetching reports:', error);
+    } finally {
+      hideLoading();
+    }
+  }
+
+  // Utility function to debounce input events
+  function debounce(func, delay) {
+    let timeoutId;
+    return function (...args) {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => func.apply(this, args), delay);
+    };
+  }
 });

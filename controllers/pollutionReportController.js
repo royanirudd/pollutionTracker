@@ -1,5 +1,13 @@
 const PollutionReport = require('../models/pollutionReport');
 
+exports.getLandingPage = (req, res) => {
+  res.render('landing', { title: 'Pollution Tracker' });
+};
+
+exports.getAppPage = (req, res) => {
+  res.render('index', { title: 'Pollution Tracker' });
+};
+
 exports.createReport = async (req, res) => {
   try {
     console.log('Received report data:', req.body);
@@ -8,39 +16,39 @@ exports.createReport = async (req, res) => {
     const { location, description } = req.body;
     console.log('Extracted location:', location);
     console.log('Extracted description:', description);
-    let coordinates;
 
     if (!location) {
       return res.status(400).json({ error: 'Location is required' });
     }
 
+    let coordinates;
     if (location.includes(',')) {
-      // If location is provided as "latitude,longitude"
       coordinates = location.split(',').map(coord => parseFloat(coord.trim()));
+      if (coordinates.length !== 2 || isNaN(coordinates[0]) || isNaN(coordinates[1])) {
+        return res.status(400).json({ error: 'Invalid location format. Please provide latitude and longitude separated by a comma.' });
+      }
     } else {
-      // If location is in an invalid format
-      // You might want to use a geocoding service here to convert it to coordinates
-      // For now, we'll just return an error
-      return res.status(400).json({ error: 'Invalid location format' });
+      return res.status(400).json({ error: 'Invalid location format. Please provide latitude and longitude separated by a comma.' });
     }
 
-    const imageUrl = req.file ? `/uploads/${req.file.filename}` : null;
-
-    if (!imageUrl) {
+    if (!req.file) {
       return res.status(400).json({ error: 'Image is required' });
     }
+
+    const imageUrl = `/uploads/${req.file.filename}`;
 
     const newReport = new PollutionReport({
       location: {
         type: 'Point',
         coordinates: [coordinates[1], coordinates[0]] // GeoJSON format is [longitude, latitude]
       },
-      description: description || '', // Use empty string if description is not provided
+      description: description || '',
       imageUrl
     });
 
-    await newReport.save();
-    res.status(201).json(newReport);
+    const savedReport = await newReport.save();
+    res.status(201).json(savedReport);
+
   } catch (error) {
     console.error('Error creating pollution report:', error);
     res.status(500).json({ error: 'Error creating pollution report', details: error.message });
