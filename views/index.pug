@@ -5,8 +5,11 @@ html(lang="en")
     meta(name="viewport", content="width=device-width, initial-scale=1.0")
     title= title
     link(rel="stylesheet", href="/css/style.css")
+    link(rel="stylesheet", href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css")
+    script(src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js")
   body
     h1 Pollution Tracker
+    #map(style="height: 400px; margin-bottom: 20px;")
     form#pollution-form
       h2 Report Pollution
       div

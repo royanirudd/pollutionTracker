@@ -30,7 +30,7 @@ exports.createReport = async (req, res) => {
 
 exports.getReports = async (req, res) => {
   try {
-    const reports = await PollutionReport.find().sort('-createdAt').limit(10).lean();
+    const reports = await PollutionReport.find().sort('-createdAt').lean();
     res.json(reports);
   } catch (error) {
     console.error('Error fetching pollution reports:', error);
