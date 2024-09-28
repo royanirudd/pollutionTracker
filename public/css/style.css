@@ -1,49 +1,93 @@
 body {
-  font-family: Arial, sans-serif;
+  font-family: 'Arial', sans-serif;
   line-height: 1.6;
   margin: 0;
-  padding: 20px;
-  background-color: #f4f4f4;
-}
-
-h1, h2 {
+  padding: 0;
+  background-color: #f0f0f0;
   color: #333;
 }
 
-form {
-  background: #fff;
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
   padding: 20px;
-  margin-bottom: 20px;
-  border-radius: 5px;
 }
 
-form div {
-  margin-bottom: 15px;
+.title {
+  text-align: center;
+  color: #2c3e50;
+  margin-bottom: 30px;
+}
+
+#map {
+  height: 400px;
+  margin-bottom: 30px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.form-container, .reports-container {
+  background: #fff;
+  padding: 30px;
+  margin-bottom: 30px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+h2 {
+  color: #2c3e50;
+  margin-top: 0;
+}
+
+.form-group {
+  margin-bottom: 20px;
 }
 
 label {
   display: block;
   margin-bottom: 5px;
+  font-weight: bold;
 }
 
 input, textarea {
   width: 100%;
-  padding: 8px;
+  padding: 10px;
   border: 1px solid #ddd;
   border-radius: 4px;
+  font-size: 16px;
 }
 
-button {
-  background: #333;
-  color: #fff;
-  padding: 10px 15px;
+textarea {
+  height: 100px;
+  resize: vertical;
+}
+
+.btn, .btn-secondary {
+  padding: 12px 20px;
   border: none;
   border-radius: 4px;
   cursor: pointer;
+  font-size: 16px;
+  transition: background 0.3s ease;
 }
 
-button:hover {
-  background: #444;
+.btn {
+  background: #3498db;
+  color: #fff;
+}
+
+.btn:hover {
+  background: #2980b9;
+}
+
+.btn-secondary {
+  background: #95a5a6;
+  color: #fff;
+  margin-bottom: 10px;
+}
+
+.btn-secondary:hover {
+  background: #7f8c8d;
 }
 
 #report-list {
@@ -52,8 +96,23 @@ button:hover {
 }
 
 #report-list li {
-  background: #fff;
-  margin-bottom: 10px;
-  padding: 10px;
+  background: #f9f9f9;
+  margin-bottom: 15px;
+  padding: 15px;
   border-radius: 4px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 10px;
+  }
+  
+  #map {
+    height: 300px;
+  }
+  
+  .form-container, .reports-container {
+    padding: 20px;
+  }
 }
