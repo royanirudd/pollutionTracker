@@ -7,6 +7,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const reportList = document.getElementById('report-list');
   const locationInput = document.getElementById('location');
   const useCurrentLocationButton = document.getElementById('use-current-location');
+  const imageInput = document.getElementById('image');
+  const takePictureButton = document.getElementById('take-picture');
 
   // Initialize map
   map = L.map('map').setView([0, 0], 2);
@@ -15,8 +17,8 @@ document.addEventListener('DOMContentLoaded', () => {
   }).addTo(map);
 
   useCurrentLocationButton.addEventListener('click', useCurrentLocation);
-
   locationInput.addEventListener('change', searchLocation);
+  takePictureButton.addEventListener('click', takePicture);
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -54,7 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
     li.innerHTML = `
       <strong>Location:</strong> ${report.location.coordinates[1]}, ${report.location.coordinates[0]}<br>
       <strong>Description:</strong> ${report.description}<br>
-      <img src="${report.imageUrl}" alt="Pollution Report Image" style="max-width: 200px;">
+      ${report.imageUrl ? `<img src="${report.imageUrl}" alt="Pollution Report Image" style="max-width: 200px;">` : ''}
     `;
     reportList.prepend(li);
   }
@@ -63,7 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const lat = report.location.coordinates[1];
     const lng = report.location.coordinates[0];
     const marker = L.marker([lat, lng]).addTo(map);
-    marker.bindPopup(`<b>Description:</b> ${report.description}<br><img src="${report.imageUrl}" alt="Pollution Report Image" style="max-width: 100px;">`);
+    marker.bindPopup(`<b>Description:</b> ${report.description}<br>${report.imageUrl ? `<img src="${report.imageUrl}" alt="Pollution Report Image" style="max-width: 100px;">` : ''}`);
     markers.push(marker);
   }
 
@@ -108,6 +110,10 @@ document.addEventListener('DOMContentLoaded', () => {
     currentMarker = L.marker([lat, lon]).addTo(map);
     map.setView([lat, lon], 13);
     locationInput.value = `${lat}, ${lon}`;
+  }
+
+  function takePicture() {
+    imageInput.click();
   }
 
   // Fetch and display existing reports

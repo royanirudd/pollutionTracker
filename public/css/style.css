@@ -115,4 +115,24 @@ textarea {
   .form-container, .reports-container {
     padding: 20px;
   }
+}.mobile-only {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 10px;
+  }
+  
+  #map {
+    height: 300px;
+  }
+  
+  .form-container, .reports-container {
+    padding: 20px;
+  }
+
+  .mobile-only {
+    display: block;
+  }
 }
