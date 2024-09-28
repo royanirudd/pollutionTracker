@@ -11,6 +11,8 @@ require('dotenv').config();
 const connectDB = require('./config/database');
 const routes = require('./routes/index');
 const User = require('./models/user');
+const { ensureAuthenticated } = require('./controllers/authController');
+const pollutionReportController = require('./controllers/pollutionReportController');
 
 const app = express();
 
@@ -115,7 +117,7 @@ app.get('/auth/github/callback',
     res.redirect('/form');
   });
 
-app.get('/logout', (req, res) => {
+app.get('/logout', (req, res, next) => {
   req.logout((err) => {
     if (err) { return next(err); }
     res.redirect('/');
@@ -127,13 +129,12 @@ app.get('/form', ensureAuthenticated, (req, res) => {
   res.render('index', { user: req.user });
 });
 
-function ensureAuthenticated(req, res, next) {
-  if (req.isAuthenticated()) { return next(); }
-  res.redirect('/login')
-}
-
 // Routes
 app.use('/', routes);
+
+// Pollution report routes
+app.post('/reports', ensureAuthenticated, pollutionReportController.createReport);
+app.get('/reports', ensureAuthenticated, pollutionReportController.getReports);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

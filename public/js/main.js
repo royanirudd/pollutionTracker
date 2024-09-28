@@ -60,6 +60,8 @@ document.addEventListener('DOMContentLoaded', () => {
           map.removeLayer(currentMarker);
           currentMarker = null;
         }
+        // Fetch updated list of reports after successful submission
+        fetchExistingReports();
       } else {
         const errorData = await response.json();
         console.error('Failed to submit report:', errorData);
@@ -164,6 +166,11 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       const reports = await response.json();
       if (Array.isArray(reports)) {
+        // Clear existing reports and markers
+        reportList.innerHTML = '';
+        markers.forEach(marker => map.removeLayer(marker));
+        markers = [];
+
         reports.forEach(report => {
           addReportToList(report);
           addMarkerToMap(report);
