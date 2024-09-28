@@ -136,3 +136,62 @@ textarea {
     display: block;
   }
 }
+.landing-page {
+  text-align: center;
+  padding: 50px 0;
+}
+
+.subtitle {
+  font-size: 1.2em;
+  color: #555;
+  margin-bottom: 30px;
+}
+
+.login-buttons {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.btn-google, .btn-github {
+  width: 200px;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background 0.3s ease;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-google {
+  background-color: #DB4437;
+  color: white;
+}
+
+.btn-google:hover {
+  background-color: #C53929;
+}
+
+.btn-github {
+  background-color: #24292E;
+  color: white;
+}
+
+.btn-github:hover {
+  background-color: #1A1E22;
+}
+
+@media (max-width: 768px) {
+  .login-buttons {
+    width: 100%;
+  }
+
+  .btn-google, .btn-github {
+    width: 100%;
+  }
+}

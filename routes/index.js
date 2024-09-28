@@ -16,7 +16,8 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-router.get('/', pollutionReportController.getHomePage);
+router.get('/', pollutionReportController.getLandingPage);
+router.get('/app', pollutionReportController.getAppPage);
 router.post('/api/reports', upload.single('image'), pollutionReportController.createReport);
 router.get('/api/reports', pollutionReportController.getReports);
 

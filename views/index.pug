@@ -1,36 +1,33 @@
-doctype html
-html(lang="en")
-  head
-    meta(charset="UTF-8")
-    meta(name="viewport", content="width=device-width, initial-scale=1.0")
-    title Pollution Tracker
-    link(rel="stylesheet", href="/css/style.css")
-    link(rel="stylesheet", href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css", integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A==", crossorigin="")
-    script(src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js", integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA==", crossorigin="")
-  body
-    .container
-      h1.title Pollution Tracker
-      #map
-      .form-container
-        form#pollution-form(enctype="multipart/form-data")
-          h2 Report Pollution
-          .form-group
-            label(for="location") Location:
-            input#location(type="text", name="location", required, placeholder="Enter a location")
-          .form-group
-            button#use-current-location.btn-secondary(type="button") Use Current Location
-          .form-group
-            label(for="description") Description (optional):
-            textarea#description(name="description")
-          .form-group
-            label(for="image") Upload Image:
-            input#image(type="file", name="image", accept="image/*", required)
-          .form-group.mobile-only
-            button#take-picture.btn-secondary(type="button") Take Picture
-          button.btn(type="submit") Submit Report
+extends layouts/main
 
-      .reports-container
-        h2 Recent Reports
-        ul#report-list
+block head
+  link(rel="stylesheet", href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css", integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A==", crossorigin="")
+  script(src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js", integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA==", crossorigin="")
 
-    script(src="/js/main.js")
+block content
+  h1.title Pollution Tracker
+  #map
+  .form-container
+    form#pollution-form(enctype="multipart/form-data")
+      h2 Report Pollution
+      .form-group
+        label(for="location") Location:
+        input#location(type="text", name="location", required, placeholder="Enter a location")
+      .form-group
+        button#use-current-location.btn-secondary(type="button") Use Current Location
+      .form-group
+        label(for="description") Description (optional):
+        textarea#description(name="description")
+      .form-group
+        label(for="image") Upload Image:
+        input#image(type="file", name="image", accept="image/*", required)
+      .form-group.mobile-only
+        button#take-picture.btn-secondary(type="button") Take Picture
+      button.btn(type="submit") Submit Report
+
+  .reports-container
+    h2 Recent Reports
+    ul#report-list
+
+block scripts
+  script(src="/js/main.js")
