@@ -4,8 +4,13 @@ const bodyParser = require('body-parser');
 const morgan = require('morgan');
 require('dotenv').config();
 
+const connectDB = require('./config/database');
+const routes = require('./routes/index');
+
 const app = express();
-const port = process.env.PORT || 3000;
+
+// Connect to MongoDB
+connectDB();
 
 // Middleware
 app.use(morgan('dev'));
@@ -18,19 +23,12 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
 
 // Routes
-app.get('/', (req, res) => {
-  res.render('index', { title: 'Pollution Tracker' });
-});
+app.use('/', routes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).send('Something broke!');
-});
-
-// Start the server
-app.listen(port, () => {
-  console.log(`Server is running on http://localhost:${port}`);
 });
 
 module.exports = app;
