@@ -7,8 +7,11 @@ block content
 
     if user
       // User is logged in
-      p Welcome back, #{user.username}!
-      a.button(href="/report") Proceed to Form
+      p Welcome back, #{user.name}!
+      if hasVisitedForm
+        a.button(href="/report") Proceed to Form
+      else
+        a.button(href="/report") Report Pollution
     else
       // User is not logged in
       p Please log in to report pollution
@@ -17,4 +20,26 @@ block content
         a.button(href="/auth/github") Login with GitHub
 
 block scripts
-  script(src='/js/main.js')
+  script.
+    document.addEventListener('DOMContentLoaded', function() {
+      const logoutButton = document.getElementById('logoutButton');
+      if (logoutButton) {
+        logoutButton.addEventListener('click', function() {
+          fetch('/api/logout', { 
+            method: 'POST',
+            credentials: 'same-origin'
+          })
+            .then(response => {
+              if (response.ok) {
+                window.location.href = '/';
+              } else {
+                throw new Error('Logout failed');
+              }
+            })
+            .catch(error => {
+              console.error('Error:', error);
+              alert('Logout failed. Please try again.');
+            });
+        });
+      }
+    });

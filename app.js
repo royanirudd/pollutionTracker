@@ -98,13 +98,25 @@ passport.use(new GitHubStrategy({
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
 
+// Middleware to track form visits
+app.use((req, res, next) => {
+  if (req.user && !req.session.hasVisitedForm) {
+    req.session.hasVisitedForm = false;
+  }
+  next();
+});
+
 // Home route
 app.get('/', (req, res) => {
-  res.render('landing', { user: req.user });
+  res.render('landing', { 
+    user: req.user,
+    hasVisitedForm: req.session.hasVisitedForm 
+  });
 });
 
 // Report form route
 app.get('/report', ensureAuthenticated, (req, res) => {
+  req.session.hasVisitedForm = true;
   res.render('report', { user: req.user });
 });
 
@@ -115,6 +127,9 @@ app.get('/auth/google',
 app.get('/auth/google/callback', 
   passport.authenticate('google', { failureRedirect: '/login' }),
   (req, res) => {
+    if (!req.session.hasVisitedForm) {
+      return res.redirect('/report');
+    }
     res.redirect('/');
   });
 
@@ -124,11 +139,16 @@ app.get('/auth/github',
 app.get('/auth/github/callback', 
   passport.authenticate('github', { failureRedirect: '/login' }),
   (req, res) => {
+    if (!req.session.hasVisitedForm) {
+      return res.redirect('/report');
+    }
     res.redirect('/');
   });
 
+
 app.post('/api/logout', (req, res) => {
-  req.logout(function(err) {
+  req.session.hasVisitedForm = false;
+  req.logout((err) => {
     if (err) { return res.status(500).json({ message: 'Could not log out, please try again' }); }
     res.clearCookie('connect.sid');
     return res.status(200).json({ message: 'Logout successful' });
