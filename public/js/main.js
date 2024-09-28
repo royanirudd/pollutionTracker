@@ -5,10 +5,17 @@ document.addEventListener('DOMContentLoaded', () => {
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
 
-    const latitude = document.getElementById('latitude').value;
-    const longitude = document.getElementById('longitude').value;
+    const latitude = parseFloat(document.getElementById('latitude').value);
+    const longitude = parseFloat(document.getElementById('longitude').value);
     const description = document.getElementById('description').value;
     const imageUrl = document.getElementById('image').value;
+
+    // Validate coordinates
+    if (isNaN(latitude) || latitude < -90 || latitude > 90 ||
+        isNaN(longitude) || longitude < -180 || longitude > 180) {
+      alert('Invalid coordinates. Latitude must be between -90 and 90, and longitude between -180 and 180.');
+      return;
+    }
 
     try {
       const response = await fetch('/api/reports', {
@@ -24,10 +31,13 @@ document.addEventListener('DOMContentLoaded', () => {
         addReportToList(newReport);
         form.reset();
       } else {
-        console.error('Failed to submit report');
+        const errorData = await response.json();
+        console.error('Failed to submit report:', errorData);
+        alert(`Failed to submit report: ${errorData.error}`);
       }
     } catch (error) {
       console.error('Error:', error);
+      alert('An error occurred while submitting the report.');
     }
   });
 
@@ -43,9 +53,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Fetch and display existing reports
   fetch('/api/reports')
-    .then(response => response.json())
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return response.json();
+    })
     .then(reports => {
-      reports.forEach(addReportToList);
+      if (Array.isArray(reports)) {
+        reports.forEach(addReportToList);
+      } else {
+        console.error('Expected an array of reports, but got:', reports);
+      }
     })
     .catch(error => console.error('Error fetching reports:', error));
 });
