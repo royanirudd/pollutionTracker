@@ -1,9 +1,30 @@
 doctype html
-html
+html(lang="en")
   head
+    meta(charset="UTF-8")
+    meta(name="viewport", content="width=device-width, initial-scale=1.0")
     title= title
-    link(rel='stylesheet', href='/css/style.css')
+    link(rel="stylesheet", href="/css/style.css")
   body
-    h1= title
-    p Welcome to the Pollution Tracker app!
-    script(src='/js/main.js')
+    h1 Pollution Tracker
+    form#pollution-form
+      h2 Report Pollution
+      div
+        label(for="latitude") Latitude:
+        input#latitude(type="number", step="any", required)
+      div
+        label(for="longitude") Longitude:
+        input#longitude(type="number", step="any", required)
+      div
+        label(for="description") Description:
+        textarea#description(required)
+      div
+        label(for="image") Image URL:
+        input#image(type="url", required)
+      button(type="submit") Submit Report
+
+    #reports
+      h2 Recent Reports
+      ul#report-list
+
+    script(src="/js/main.js")
