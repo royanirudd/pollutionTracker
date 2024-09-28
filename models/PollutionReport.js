@@ -9,12 +9,12 @@ const pollutionReportSchema = new mongoose.Schema({
     },
     coordinates: {
       type: [Number],
-      required: true
+      required: true 
     }
   },
   description: {
     type: String,
-    required: true
+    required: false
   },
   imageUrl: {
     type: String

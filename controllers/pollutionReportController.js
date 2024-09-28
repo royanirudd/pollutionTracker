@@ -10,24 +10,32 @@ exports.createReport = async (req, res) => {
     console.log('Extracted description:', description);
     let coordinates;
 
-    if (location && location.includes(',')) {
+    if (!location) {
+      return res.status(400).json({ error: 'Location is required' });
+    }
+
+    if (location.includes(',')) {
       // If location is provided as "latitude,longitude"
       coordinates = location.split(',').map(coord => parseFloat(coord.trim()));
     } else {
-      // If location is not provided or is in an invalid format
+      // If location is in an invalid format
       // You might want to use a geocoding service here to convert it to coordinates
-      // For now, we'll just use a placeholder
-      coordinates = [0, 0];
+      // For now, we'll just return an error
+      return res.status(400).json({ error: 'Invalid location format' });
     }
 
     const imageUrl = req.file ? `/uploads/${req.file.filename}` : null;
+
+    if (!imageUrl) {
+      return res.status(400).json({ error: 'Image is required' });
+    }
 
     const newReport = new PollutionReport({
       location: {
         type: 'Point',
         coordinates: [coordinates[1], coordinates[0]] // GeoJSON format is [longitude, latitude]
       },
-      description,
+      description: description || '', // Use empty string if description is not provided
       imageUrl
     });
 
