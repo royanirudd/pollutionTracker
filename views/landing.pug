@@ -1,9 +1,45 @@
-extends layouts/main
+extends layout
 
 block content
-  .landing-page
-    h1.title Pollution Tracker
-    p.subtitle Track and report pollution in your area
-    .login-buttons
-      a.btn.btn-google(href="/auth/google") Login with Google
-      a.btn.btn-github(href="/auth/github") Login with GitHub
+  .landing-content
+    h1 Welcome to Pollution Tracker
+    p Track and report pollution in your area
+
+    if user
+      // User is logged in
+      p Welcome back, #{user.name}!
+      if hasVisitedForm
+        a.button(href="/report") Proceed to Form
+      else
+        a.button(href="/report") Report Pollution
+    else
+      // User is not logged in
+      p Please log in to report pollution
+      .login-buttons
+        a.button(href="/auth/google") Login with Google
+        a.button(href="/auth/github") Login with GitHub
+
+block scripts
+  script.
+    document.addEventListener('DOMContentLoaded', function() {
+      const logoutButton = document.getElementById('logoutButton');
+      if (logoutButton) {
+        logoutButton.addEventListener('click', function() {
+          fetch('/api/logout', { 
+            method: 'POST',
+            credentials: 'same-origin'
+          })
+            .then(response => {
+              if (response.ok) {
+                window.location.href = '/';
+              } else {
+                throw new Error('Logout failed');
+              }
+            })
+            .catch(error => {
+              console.error('Error:', error);
+              alert('Logout failed. Please try again.');
+            });
+        });
+      }
+    });
