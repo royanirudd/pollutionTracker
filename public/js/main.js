@@ -25,6 +25,11 @@ document.addEventListener('DOMContentLoaded', () => {
     position: 'topright'
   }).addTo(map);
 
+  // Add event listener to resize map when window size changes
+  window.addEventListener('resize', function() {
+    map.invalidateSize();
+  });
+
   useCurrentLocationButton.addEventListener('click', useCurrentLocation);
   locationInput.addEventListener('input', debounce(searchLocation, 500));
   takePictureButton.addEventListener('click', takePicture);
