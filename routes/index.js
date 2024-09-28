@@ -4,5 +4,6 @@ const pollutionReportController = require('../controllers/pollutionReportControl
 
 router.get('/', pollutionReportController.getHomePage);
 router.post('/api/reports', pollutionReportController.createReport);
+router.get('/api/reports', pollutionReportController.getReports);
 
 module.exports = router;

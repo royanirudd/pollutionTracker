@@ -19,6 +19,16 @@ exports.createReport = async (req, res) => {
   }
 };
 
+exports.getReports = async (req, res) => {
+  try {
+    const reports = await PollutionReport.find().sort('-createdAt').limit(10);
+    res.json(reports);
+  } catch (error) {
+    console.error('Error fetching pollution reports:', error);
+    res.status(500).json({ error: 'Error fetching pollution reports' });
+  }
+};
+
 exports.getHomePage = (req, res) => {
   res.render('index', { title: 'Pollution Tracker' });
 };
