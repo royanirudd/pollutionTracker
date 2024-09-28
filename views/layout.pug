@@ -1,0 +1,50 @@
+doctype html
+html(lang="en")
+  head
+    meta(charset="UTF-8")
+    meta(name="viewport", content="width=device-width, initial-scale=1.0")
+    title Pollution Tracker
+    link(rel="stylesheet", href="/css/style.css")
+    block head
+  body
+    header
+      nav
+        a(href="/") Home
+        if user
+          a(href="/profile") Profile
+          a#logout-button.logout-button(href="#") Logout
+        else
+          a(href="/login") Login
+          a(href="/register") Register
+    
+    main
+      block content
+    
+    footer
+      p &copy; 2023 Pollution Tracker. All rights reserved.
+    
+    block scripts
+    script.
+      // Add this script to handle logout
+      document.addEventListener('DOMContentLoaded', function() {
+        const logoutButton = document.getElementById('logout-button');
+        if (logoutButton) {
+          logoutButton.addEventListener('click', function(e) {
+            e.preventDefault();
+            fetch('/api/logout', {
+              method: 'POST',
+              credentials: 'same-origin'
+            })
+            .then(response => {
+              if (response.ok) {
+                window.location.href = '/';  // Redirect to home page
+              } else {
+                console.error('Logout failed');
+              }
+            })
+            .catch(error => {
+              console.error('Error:', error);
+            });
+          });
+        }
+      });

@@ -1,9 +1,19 @@
-extends layouts/main
+extends layout
 
 block content
-  .landing-page
-    h1.title Pollution Tracker
-    p.subtitle Track and report pollution in your area
+  h1 Welcome to Pollution Tracker
+  p Track and report pollution in your area
+
+  if user
+    // User is logged in
+    p Welcome back, #{user.username}!
+    a.button(href="/report") Proceed to Form
+  else
+    // User is not logged in
+    p Please log in to report pollution
     .login-buttons
-      a.btn.btn-google(href="/auth/google") Login with Google
-      a.btn.btn-github(href="/auth/github") Login with GitHub
+      a.button(href="/auth/google") Login with Google
+      a.button(href="/auth/github") Login with GitHub
+
+block scripts
+  script(src='/js/main.js')
